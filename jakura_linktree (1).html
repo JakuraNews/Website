@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jakura News - Link Tree</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            background: #000;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Glowing particles instead of snow */
+        .particle {
+            position: absolute;
+            background: #ff66c4;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            animation: float linear infinite;
+            box-shadow: 0 0 20px #ff66c4, 0 0 40px #ff66c4, 0 0 60px #ff66c4;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        .particle-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .profile-section {
+            margin-bottom: 50px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .profile-image {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: #ff66c4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 4rem;
+            color: #000;
+            font-weight: 700;
+            box-shadow: 0 0 30px #ff66c4, 0 0 60px #ff66c4, 0 0 90px #ff66c4;
+            animation: profilePulse 3s ease-in-out infinite;
+            border: 3px solid #fff;
+        }
+
+        @keyframes profilePulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 30px #ff66c4, 0 0 60px #ff66c4, 0 0 90px #ff66c4;
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 40px #ff66c4, 0 0 80px #ff66c4, 0 0 120px #ff66c4;
+            }
+        }
+
+        .title {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 15px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px #fff, 0 0 40px #ff66c4, 0 0 60px #ff66c4;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from {
+                text-shadow: 0 0 20px #fff, 0 0 40px #ff66c4, 0 0 60px #ff66c4;
+            }
+            to {
+                text-shadow: 0 0 30px #fff, 0 0 60px #ff66c4, 0 0 90px #ff66c4;
+            }
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: #fff;
+            margin-bottom: 25px;
+            font-weight: 500;
+            text-shadow: 0 0 10px #fff;
+        }
+
+        .email {
+            font-size: 1.1rem;
+            color: #000;
+            margin-bottom: 50px;
+            background: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            display: inline-block;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 0 20px #fff, 0 0 40px #fff;
+            border: 2px solid #ff66c4;
+        }
+
+        .email:hover {
+            background: #ff66c4;
+            color: #fff;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 0 30px #ff66c4, 0 0 60px #ff66c4;
+        }
+
+        .links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 60px;
+        }
+
+        .link-item {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .link-item:nth-child(1) { animation-delay: 0.2s; }
+        .link-item:nth-child(2) { animation-delay: 0.4s; }
+        .link-item:nth-child(3) { animation-delay: 0.6s; }
+        .link-item:nth-child(4) { animation-delay: 0.8s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .link-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            padding: 20px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-family: 'Fredoka', sans-serif;
+            position: relative;
+            color: #000;
+            background: #fff;
+            border: 3px solid #ff66c4;
+            box-shadow: 0 0 20px #fff, 0 0 40px #ff66c4;
+        }
+
+        .link-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            background: #ff66c4;
+            color: #fff;
+            box-shadow: 0 0 30px #ff66c4, 0 0 60px #ff66c4, 0 0 90px #ff66c4;
+        }
+
+        .icon {
+            font-size: 1.8rem;
+            min-width: 30px;
+        }
+
+        /* Featured Section */
+        .featured-section {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease forwards 1s;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .featured-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 40px;
+            text-shadow: 0 0 20px #fff, 0 0 40px #ff66c4;
+        }
+
+        .featured-links {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .featured-btn {
+            padding: 18px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-family: 'Fredoka', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .sakura {
+            background: #fff;
+            color: #ff66c4;
+            border: 3px solid #ff66c4;
+            box-shadow: 0 0 20px #fff, 0 0 40px #ff66c4;
+        }
+
+        .sakura:hover {
+            transform: translateY(-5px) scale(1.05);
+            background: #ff66c4;
+            color: #fff;
+            box-shadow: 0 0 30px #ff66c4, 0 0 60px #ff66c4, 0 0 90px #ff66c4;
+        }
+
+        .jason {
+            background: #fff;
+            color: #4a90e2;
+            border: 3px solid #4a90e2;
+            box-shadow: 0 0 20px #fff, 0 0 40px #4a90e2;
+        }
+
+        .jason:hover {
+            transform: translateY(-5px) scale(1.05);
+            background: #4a90e2;
+            color: #fff;
+            box-shadow: 0 0 30px #4a90e2, 0 0 60px #4a90e2, 0 0 90px #4a90e2;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 30px 15px;
+            }
+
+            .title {
+                font-size: 3rem;
+                letter-spacing: 2px;
+            }
+
+            .profile-image {
+                width: 120px;
+                height: 120px;
+                font-size: 3rem;
+            }
+
+            .link-btn {
+                padding: 18px 30px;
+                font-size: 1.1rem;
+                gap: 15px;
+            }
+
+            .featured-links {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .featured-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .links-container {
+                gap: 20px;
+            }
+
+            .featured-title {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 2.5rem;
+            }
+
+            .profile-image {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+            }
+
+            .link-btn {
+                padding: 16px 25px;
+                font-size: 1rem;
+            }
+
+            .featured-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Container -->
+    <div class="particle-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="profile-section">
+            <div class="profile-image">📰</div>
+            <h1 class="title">Jakura News</h1>
+            <p class="subtitle">Your source for JasonTheWeen & Sakurashymko updates</p>
+            <div class="email">📧 Jakuranews@gmail.com</div>
+        </div>
+
+        <div class="links-container">
+            <div class="link-item">
+                <a href="https://instagram.com/jakuranews" target="_blank" class="link-btn">
+                    <span class="icon">📷</span>
+                    <span>Follow on Instagram</span>
+                </a>
+            </div>
+
+            <div class="link-item">
+                <a href="https://twitter.com/jakuranews" target="_blank" class="link-btn">
+                    <span class="icon">🐦</span>
+                    <span>Follow on Twitter</span>
+                </a>
+            </div>
+
+            <div class="link-item">
+                <a href="https://youtube.com/@jakuranews" target="_blank" class="link-btn">
+                    <span class="icon">📺</span>
+                    <span>Subscribe on YouTube</span>
+                </a>
+            </div>
+
+            <div class="link-item">
+                <a href="https://tiktok.com/@jakuranews" target="_blank" class="link-btn">
+                    <span class="icon">🎵</span>
+                    <span>Follow on TikTok</span>
+                </a>
+            </div>
+        </div>
+
+        <section class="featured-section">
+            <h2 class="featured-title">Featured Creators</h2>
+            <div class="featured-links">
+                <a href="https://linktr.ee/saakkura" target="_blank" class="featured-btn sakura">
+                    <span>🌸</span>
+                    <span>Sakurashymko</span>
+                </a>
+                <a href="https://linktr.ee/jasontheween" target="_blank" class="featured-btn jason">
+                    <span>👻</span>
+                    <span>JasonTheWeen</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Glowing particle animation
+        function createParticle() {
+            const particleContainer = document.querySelector('.particle-container');
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            const size = Math.random() * 6 + 3;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.left = Math.random() * window.innerWidth + 'px';
+            particle.style.animationDuration = Math.random() * 4 + 3 + 's';
+            particle.style.animationDelay = Math.random() * 2 + 's';
+            
+            particleContainer.appendChild(particle);
+            
+            setTimeout(() => {
+                if (particle.parentElement) {
+                    particle.remove();
+                }
+            }, 7000);
+        }
+
+        setInterval(createParticle, 300);
+
+        // Create initial particles
+        for (let i = 0; i < 20; i++) {
+            setTimeout(createParticle, i * 150);
+        }
+
+        // Interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Email click to copy
+            const emailElement = document.querySelector('.email');
+            emailElement.addEventListener('click', function() {
+                navigator.clipboard.writeText('Jakuranews@gmail.com').then(() => {
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '✅ Email Copied!';
+                    this.style.background = '#ff66c4';
+                    this.style.color = '#fff';
+                    
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.style.background = '#fff';
+                        this.style.color = '#000';
+                    }, 2000);
+                });
+            });
+
+            // Profile image hover effect
+            const profileImage = document.querySelector('.profile-image');
+            profileImage.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1) rotate(5deg)';
+            });
+            
+            profileImage.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1) rotate(0deg)';
+            });
+
+            // Add click effects to buttons
+            const allButtons = document.querySelectorAll('.link-btn, .featured-btn');
+            allButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+        });
+
+        // Add pulsing glow to the whole page
+        const style = document.createElement('style');
+        style.textContent = `
+            body::before {
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: radial-gradient(circle at center, rgba(255, 102, 196, 0.1) 0%, transparent 70%);
+                pointer-events: none;
+                z-index: 1;
+                animation: backgroundPulse 4s ease-in-out infinite alternate;
+            }
+            
+            @keyframes backgroundPulse {
+                from {
+                    opacity: 0.3;
+                }
+                to {
+                    opacity: 0.6;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
